@@ -24,3 +24,23 @@ input[type=number]::-webkit-outer-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
+
+/* Base size and color */
+.x-icon {
+  width: 14px;
+  height: 14px;
+  stroke: white; /* inherits button text color */
+  transition: stroke 0.2s, transform 0.2s;
+}
+.btn-outline-danger {
+  border: none;          /* remove outline border */
+  color: currentColor;    /* keep text/icon color */
+  border-radius: 20; 
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-outline-danger:hover {
+  background-color: rgba(255, 77, 79, 0.2); /* light red hover background */
+  color: #ff4d4f;  /* red color on hover */
+  transform: scale(1.0001); /* slightly enlarge icon */
+}

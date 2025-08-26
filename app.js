@@ -54,15 +54,24 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div class="d-flex align-items-center gap-3">
               <div class="rounded-circle bg-danger bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                <i class="bi bi-person text-danger"></i>
+                 <i class="bi bi-person text-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="7" r="4"></circle>
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+            </svg></i>
               </div>
               <div>
                 <h5 class="mb-0 text-white">Player</h5>
                 <small class="text-muted">Still playing</small>
               </div>
             </div>
-            <button class="btn btn-sm btn-outline-danger rounded-circle removePlayerBtn">
-              <i class="bi bi-x-lg"></i>
+            <button class="btn btn-sm btn-outline-danger removePlayerBtn">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" class="x-icon">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
             </button>
           </div>
           <div class="mb-3">
