@@ -7,10 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const settlementSection = document.getElementById("settlement-results");
   const calcBtn = document.querySelector(".btn.btn-danger.d-flex.align-items-center.px-4.py-2");
-  const cardBodies = settlementSection.querySelectorAll(".card-body");
-
-  const balancesContainer = cardBodies[0];  // first card-body → balances
-  const transactionsContainer = cardBodies[1]; // second card-body → transactions
+  const balancesContainer = settlementSection.querySelector(".balances-list");
+  const transactionsContainer = settlementSection.querySelector(".transactions-list");
 
 
   const MIN_PLAYERS = 2;
