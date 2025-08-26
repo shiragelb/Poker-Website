@@ -6,16 +6,327 @@
   <title>Poker Settlement</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
 
-  <div class="container mt-5">
-    <h1 class="text-center">Poker Settlement App</h1>
-    <p class="text-center text-muted">Calculate payouts easily when there are multiple winners</p>
-    
-    <!-- Your form and content will go here -->
-     
+ <link rel="stylesheet" href="style.css">
+</head>
+
+<body  class="d-flex flex-column min-vh-100">
+
+<!-- Header -->
+<header id="main-header" class="p-3 text-bg-dark app-header"> 
+  <div class="container"> 
+    <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start"> 
+      
+      <!-- Logo link with SVG -->
+      <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none"> 
+        <svg xmlns="http://www.w3.org/2000/svg" 
+             width="32" height="32" 
+             viewBox="0 0 24 24" 
+             fill="none" 
+             stroke="currentColor" 
+             stroke-width="2" 
+             stroke-linecap="round" 
+             stroke-linejoin="round" 
+             class="lucide lucide-spade text-white me-2">
+          <path d="M5 9c-1.5 1.5-3 3.2-3 5.5A5.5 5.5 0 0 0 7.5 20c1.8 0 3-.5 4.5-2 1.5 1.5 2.7 2 4.5 2a5.5 5.5 0 0 0 5.5-5.5c0-2.3-1.5-4-3-5.5l-7-7-7 7Z"></path>
+          <path d="M12 18v4"></path>
+        </svg>
+      </a>
+      
+      <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0"> 
+        <!-- <li><a href="#" class="nav-link px-2 text-secondary">Home</a></li> 
+        <li><a href="#" class="nav-link px-2 text-white">Features</a></li> 
+        <li><a href="#" class="nav-link px-2 text-white">Pricing</a></li> 
+        <li><a href="#" class="nav-link px-2 text-white">FAQs</a></li> 
+        <li><a href="#" class="nav-link px-2 text-white">About</a></li>  -->
+      </ul> 
+      
+      <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search"> 
+      </form> 
+      
+      <div class="text-end"> 
+        <button type="button" class="btn btn-outline-light me-2">Login</button> 
+        <button type="button" class="btn btn-signup">Sign-up</button> 
+      </div> 
+    </div> 
+  </div> 
+</header>
+
+
+<!-- Welcome front page-->
+    <div class="container my-5 flex-grow-1">
+        <h1 class="text-center">Poker Settlement App</h1>
+        <p class="text-center text-muted">Calculate payouts easily with minimal transactions
+        </p>
+        
+        <!-- Your form and content will go here -->
+
+    </div >
+
+<!-- Main Content -->
+<div class="container my-4">
+
+<!-- Game Setup Card -->
+  <div class="card bg-dark text-white shadow rounded-3 p-4 mb-5">
+    <div class="card-body">
+      <h3 class="card-title d-flex align-items-center gap-2 mb-4">
+        <i class="bi bi-people text-danger"></i> Game Setup
+      </h3>
+
+      <!-- Game Name -->
+      <div class="mb-4">
+        <label class="form-label text-light">Game Name (Optional)</label>
+        <input type="text" class="form-control bg-secondary text-white border-0" placeholder="Friday Night Poker">
+      </div>
+
+      <!-- Stats -->
+      <div class="row text-center">
+        <div class="col-md-6 mb-3">
+          <div class="bg-secondary p-3 rounded-3">
+            <div class="fs-3 fw-bold">$0.00</div>
+            <div class="text-muted">Total Pot</div>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="bg-secondary p-3 rounded-3">
+            <div class="fs-3 fw-bold">$0.00</div>
+            <div class="text-muted">Total Chips</div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
+ <!-- Players Section -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="text-white">Players</h2>
+    <button class="btn btn-danger d-flex align-items-center addPlayerBtn">
+      <i class="bi bi-plus-lg me-2"></i> Add Player
+    </button>
+  </div>
+
+  <!-- Players Grid -->
+  <div class="row g-4">
+    
+    <!-- Player Card 1 -->
+    <div class="col-md-6 col-lg-4 player-card">
+      <div class="card bg-dark border-secondary shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="d-flex align-items-center gap-3">
+              <div class="rounded-circle bg-danger bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                <i class="bi bi-person text-danger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                 stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user w-5 h-5 text-red-400"
+                  data-filename="components/calculator/PlayerCard" data-linenumber="28" 
+                  data-visual-selector-id="components/calculator/PlayerCard28" 
+                  data-source-location="components/calculator/PlayerCard:28:16" 
+                  data-dynamic-content="false"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg></i>
+              </div>
+              <div>
+                <h5 class="mb-0 text-white">Player 1</h5>
+                <small class="text-muted">Still playing</small>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-outline-danger rounded-circle">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <!-- Inputs -->
+          <div class="mb-3">
+            <label class="form-label text-light">Player Name</label>
+            <input type="text" class="form-control bg-secondary text-white border-0 player-name-input" placeholder="Enter player name">
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-light">Buy-in Amount ($)</label>
+            <input type="number" class="form-control bg-secondary text-white border-0 buyin-input"  placeholder="0">
+          </div>
+          <div class="mb-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <label class="form-label text-light mb-0">Current Chips ($)</label>
+              <!-- <span class="badge bg-success bg-opacity-25 text-success">Playing</span> -->
+            </div>
+            <input type="number" class="form-control bg-secondary text-white border-0 chips-input" placeholder="0">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Player Card 2 -->
+<div class="col-md-6 col-lg-4 player-card">
+  <div class="card bg-dark border-secondary shadow-sm h-100">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="rounded-circle bg-danger bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+            <i class="bi bi-person text-danger">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+             stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user w-5 h-5 text-red-400">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg></i>
+          </div>
+          <div>
+            <h5 class="mb-0 text-white">Player 2</h5>
+            <small class="text-muted">Still playing</small>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-outline-danger rounded-circle">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <!-- Inputs -->
+      <div class="mb-3">
+        <label class="form-label text-light">Player Name</label>
+        <input type="text" class="form-control bg-secondary text-white border-0 player-name-input" placeholder="Enter player name">
+      </div>
+      <div class="mb-3">
+        <label class="form-label text-light">Buy-in Amount ($)</label>
+        <input type="number" class="form-control bg-secondary text-white border-0 buyin-input" placeholder="0">
+      </div>
+      <div class="mb-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <label class="form-label text-light mb-0">Current Chips ($)</label>
+        </div>
+        <input type="number" class="form-control bg-secondary text-white border-0 chips-input chips-input" placeholder="0">
+      </div>
+    </div>
+  </div>
+</div>
+    <!-- More player cards can be added dynamically -->
+
+  </div>
+</div>
+
+<!-- Settlement Results (hidden by default) -->
+<div id="settlement-results" class="d-none mt-4" >
+  <div class="container d-flex justify-content-between align-items-center mb-3">
+    <h2 class="0-4-4H9a4">Settlement Results</h2>
+    <button type="button" class="btn btn-outline-danger d-flex align-items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-1">
+        <path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"></path>
+        <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path>
+        <path d="M7 3v4a1 1 0 0 0 1 1h7"></path>
+      </svg>
+      Save Game
+    </button>
+  </div>
+
+  <!-- Player Balances -->
+  <div  class="container card bg-dark text-white mb-3">
+    <div class="card-body">
+      <h3 class="h5 d-flex align-items-center mb-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-danger me-2">
+          <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+          <path d="m9 11 3 3L22 4"></path>
+        </svg>
+        Player Balances
+      </h3>
+      
+      <!-- Example balances -->
+      <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-success bg-opacity-25 rounded border border-success">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-success">&nbsp;</span>
+          <span>Itamar</span>
+        </div>
+        <div class="d-flex align-items-center gap-1 text-success fw-bold">+$20.00</div>
+      </div>
+      <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-danger bg-opacity-25 rounded border border-danger">
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-danger">&nbsp;</span>
+          <span>Shira</span>
+        </div>
+        <div class="d-flex align-items-center gap-1 text-danger fw-bold">-$20.00</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settlement Transactions -->
+  <div class="container card bg-dark text-white mb-3">
+    <div class="card-body">
+      <h3 class="h5 d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex align-items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-danger me-2">
+            <path d="M5 12h14"></path>
+            <path d="m12 5 7 7-7 7"></path>
+          </svg>
+          Settlement Transactions
+        </div>
+        <span class="badge rounded-pill border border-danger text-danger">1 transfer</span>
+      </h3>
+
+      <!-- Example transaction -->
+      <div class="d-flex justify-content-between align-items-center p-2 mb-2 bg-secondary bg-opacity-25 rounded border border-secondary">
+        <div class="d-flex align-items-center gap-3">
+          <span class="fw-medium">Shira</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-danger">
+            <path d="M5 12h14"></path>
+            <path d="m12 5 7 7-7 7"></path>
+          </svg>
+          <span class="fw-medium">Itamar</span>
+        </div>
+        <span class="badge bg-danger text-white">$20.00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tip -->
+  <div class="container p-2 bg-danger bg-opacity-25 border border-danger rounded text-center text-danger">
+    💡 This is the minimum number of transfers needed to settle all debts
+  </div>
+</div>
+
+<!-- Calculate Button -->
+
+<div class="d-flex justify-content-center mt-3">
+  <button type="button" class="btn btn-danger d-flex align-items-center px-4 py-2">
+    <!-- SVG icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="me-2">
+      <rect width="16" height="20" x="4" y="2" rx="2"></rect>
+      <line x1="8" x2="16" y1="6" y2="6"></line>
+      <line x1="16" x2="16" y1="14" y2="18"></line>
+      <path d="M16 10h.01"></path>
+      <path d="M12 10h.01"></path>
+      <path d="M8 10h.01"></path>
+      <path d="M12 14h.01"></path>
+      <path d="M8 14h.01"></path>
+      <path d="M12 18h.01"></path>
+      <path d="M8 18h.01"></path>
+    </svg>
+    Calculate Settlement
+  </button>
+</div>
+
+
+
+
+<!-- Footer -->
+<footer class="container d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+     <div class=" col-md-4 d-flex align-items-center">
+    <a href="/" class="mb-3 me-2 mb-md-0 text-body-secondary text-decoration-none lh-1" aria-label="Bootstrap"> 
+        <svg class="bi" width="30" height="24" aria-hidden="true"><use xlink:href="#bootstrap"></use></svg>
+     </a> <span class="mb-3 mb-md-0 text-body-secondary">© 2025 Shira Gelbstein</span> 
+    </div> 
+    <ul class="nav col-md-4 justify-content-end list-unstyled d-flex"> 
+       <li class="ms-3">
+      <a class="text-body-secondary" href="https://www.linkedin.com/in/shiragelbstein/" target="_blank" aria-label="LinkedIn">
+        <img src="icons/icons8-linkedin.svg" alt="LinkedIn" width="24" height="24">
+      </a>
+    </li> 
+    <li class="ms-3">
+      <a class="text-body-secondary" href="https://github.com/shiragelb" target="_blank" aria-label="GitHub">
+        <img src="icons/github-mark.svg" alt="GitHub" width="24" height="24">
+      </a>
+    </li> 
+</footer>
+
+
 
   <!-- Bootstrap JS + Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
