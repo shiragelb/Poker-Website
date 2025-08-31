@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function createPlayerCard() {
     const col = document.createElement("div");
-    col.className = "col-md-6 col-lg-4 player-card";
+    col.className = "col-md-6 col-lg-4 player-card pop-in-top";
 
     col.innerHTML = `
       <div class="card bg-dark border-secondary shadow-sm h-100">
@@ -261,15 +261,14 @@ transfersBadge.textContent = `${transfersCount} transfer${transfersCount !== 1 ?
 
 // ----- Game History Management -----
 
-// History data from localStorage
-localStorage.removeItem("gameHistory");
-localStorage.clear();
+// Load history from localStorage
 let gameHistory = JSON.parse(localStorage.getItem("gameHistory")) || [];
-
 
 // Render history cards
 function renderHistory() {
-  console.log("Rendering history...", gameHistory);
+    
+  // Load history from localStorage
+  
   const historyList = document.getElementById("historyList");
   if (!historyList) return;
 
@@ -281,12 +280,14 @@ function renderHistory() {
   }
 
 // Before rendering, update curGame details
-
 curGame.name = document.querySelector(".game-name").value || "Unnamed Game";
 curGame.date = new Date().toISOString(); // or .toLocaleString() if you prefer readable
 curGame.totalPlayers = curGame.players.length;
 curGame.totalPot = parseFloat(totalPotEl.textContent.replace("$", "")) || 0;
 curGame.transfersCount = transfersCount;
+
+console.log("Rendering history...", gameHistory);
+// Render each game
 gameHistory.forEach((game, idx) => {
   const card = document.createElement("div");
   card.className = "col-12 col-md-10 col-lg-8 mx-auto mb-4"; // centered
@@ -323,27 +324,34 @@ gameHistory.forEach((game, idx) => {
       <!-- Stats row -->
       <div class="card-body">
         <div class="row g-3 text-center">
-          <div class="col bg-secondary bg-opacity-25 rounded-3 p-3">
-            <div class="fs-5 fw-bold text-white">${game.totalPlayers}</div>
-            <small class="text-light opacity-75">Players</small>
+          <div class="col-md-4">
+            <div class="bg-secondary bg-opacity-25 rounded-3 p-3">
+              <div class="fs-5 fw-bold text-white">${game.totalPlayers}</div>
+              <small class="text-light opacity-75">Players</small>
+            </div>
           </div>
-          <div class="col bg-secondary bg-opacity-25 rounded-3 p-3">
-            <div class="fs-5 fw-bold text-white">$${game.totalPot.toFixed(2)}</div>
-            <small class="text-light opacity-75">Pot</small>
+          <div class="col-md-4">
+            <div class="bg-secondary bg-opacity-25 rounded-3 p-3">
+              <div class="fs-5 fw-bold text-white">$${game.totalPot.toFixed(2)}</div>
+              <small class="text-light opacity-75">Pot</small>
+            </div>
           </div>
-          <div class="col bg-secondary bg-opacity-25 rounded-3 p-3">
-            <div class="fs-5 fw-bold text-white">${game.transfersCount}</div>
-            <small class="text-light opacity-75">Transfers</small>
+          <div class="col-md-4">
+            <div class="bg-secondary bg-opacity-25 rounded-3 p-3">
+              <div class="fs-5 fw-bold text-white">${game.transfersCount}</div>
+              <small class="text-light opacity-75">Transfers</small>
+            </div>
           </div>
         </div>
       </div>
+
 
       <!-- Collapsible content -->
       <div class="card-body border-top border-secondary pt-4 collapse" id="collapse-${idx}">
         <!-- Players -->
         <h6 class="fw-semibold text-white mb-3">Players</h6>
         <div class="row g-3">
-          ${game.players.map(p => `
+          ${(game.players || []).map(p => `
             <div class="col-md-6">
               <div class="d-flex justify-content-between align-items-center p-3 bg-secondary bg-opacity-25 rounded-3">
                 <div class="d-flex align-items-center gap-2">
@@ -361,7 +369,7 @@ gameHistory.forEach((game, idx) => {
         <!-- Transactions -->
         <h6 class="fw-semibold text-white mt-4 mb-3">Settlement Transactions</h6>
         <div class="d-flex flex-column gap-3">
-          ${game.transactions.map(t => `
+          ${(game.transactions || []).map(t => `
             <div class="d-flex justify-content-between align-items-center p-3 bg-secondary bg-opacity-25 rounded-3">
               <div class="d-flex align-items-center gap-3">
                 <span class="fw-medium text-white">${t.from}</span>
@@ -393,7 +401,6 @@ gameHistory.forEach((game, idx) => {
   historyList.appendChild(card);
 });
 
-
   // Attach toggle listeners
 }
 
@@ -410,18 +417,47 @@ document.querySelector(".Calculate-btn").addEventListener("click", () => {
   document.getElementById("mainPage").classList.remove("d-none");
 });
 
-// Keeps track if we already saved to avoid duplicates
-let saved = false;
 
 document.querySelector('.save-btn').addEventListener('click', () => {
-  if (!curGame) return; // currentGame is your existing game object
-  gameHistory.push(curGame);
+  if (!curGame) return;
+
+  // Create a fresh snapshot of curGame
+  const savedGame = {
+    name: document.querySelector(".game-name").value || "Unnamed Game",
+    date: new Date().toISOString(),
+    totalPlayers: curGame.players.length,
+    totalPot: parseFloat(totalPotEl.textContent.replace("$", "")) || 0,
+    transfersCount: transfersCount,
+    players: JSON.parse(JSON.stringify(curGame.players)) // deep copy players
+  };
+
+  gameHistory.unshift(savedGame);
   localStorage.setItem("gameHistory", JSON.stringify(gameHistory));
 
   if (!document.getElementById("historyPage").classList.contains("d-none")) {
     renderHistory();
   }
-});
+ 
+  });
+
+  saved = true;
+
+  document.getElementById("clearHistoryBtn").addEventListener("click", () => {
+    // Clear in-memory list and localStorage
+    gameHistory = [];
+    localStorage.removeItem('gameHistory')
+
+    // Animate cards fading out
+    const historyList = document.getElementById("historyList");
+    historyList.querySelectorAll(".card").forEach(card => {
+      card.classList.add("fade-out"); // add CSS transition
+    });
+
+    // After animation, replace with "No history"
+    setTimeout(() => {
+      historyList.innerHTML = `<p class="text-gray-400 text-center">No game history yet.</p>`;
+    }, 300); // match transition time
+  });
 
 });
 

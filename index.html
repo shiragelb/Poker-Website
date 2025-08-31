@@ -56,8 +56,8 @@
 <div id="mainPage">
 <!-- Welcome front page-->
     <div class="container my-5 flex-grow-1">
-        <h1 class="text-center">Poker Settlement App</h1>
-        <p class="text-center text-muted">Calculate payouts easily with minimal transactions
+        <h1 class="text-center pop-in-top">Poker Settlement App</h1>
+        <p class="text-center text-muted pop-in-top" style="animation-delay: 0.06s;">Calculate payouts easily with minimal transactions
         </p>
         
         <!-- Your form and content will go here -->
@@ -110,7 +110,7 @@
   <div class="row g-4">
     
     <!-- Player Card 1 -->
-    <div class="col-md-6 col-lg-4 player-card">
+    <div class="col-md-6 col-lg-4 player-card pop-in-top ">
       <div class="card bg-dark border-secondary shadow-sm h-100">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-start mb-3">
@@ -158,7 +158,7 @@
     </div>
 
     <!-- Player Card 2 -->
-<div class="col-md-6 col-lg-4 player-card">
+<div class="col-md-6 col-lg-4 player-card pop-in-top ">
   <div class="card bg-dark border-secondary shadow-sm h-100">
     <div class="card-body">
       <div class="d-flex justify-content-between align-items-start mb-3">
@@ -313,13 +313,19 @@
 
 </div>
 <div id="historyPage" class="d-none my-5 flex-grow-1">
-  <h1 class="text-center">Game History</h1>
-  <p class="text-center text-muted">Review your past poker settlements and transactions</p>
+  <h1 class="text-center  pop-in-top">Game History</h1>
+  <p class="text-center text-muted  pop-in-top">Review your past poker settlements and transactions</p>
 
- <div class="row justify-content-center mt-4">
+ <div class="row justify-content-center mt-4 ">
   <div id="historyList" class="col-md-8">
     <!-- History cards go here -->
   </div>
+</div>
+
+<div class="d-flex justify-content-center mb-3">
+  <button id="clearHistoryBtn" class="btn btn-danger">
+    Clear History
+  </button>
 </div>
 
 </div>

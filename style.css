@@ -44,3 +44,31 @@ input[type=number] {
   color: #ff4d4f;  /* red color on hover */
   transform: scale(1.0001); /* slightly enlarge icon */
 }
+.fade-out {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+/* Fade + scale pop-in */
+/* Slide + fade from top for intro text */
+.pop-in-top {
+  opacity: 0;
+  transform: translateY(-20px); /* start above */
+  animation: popInTop 0.6s ease-out forwards;
+}
+
+@keyframes popInTop {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(10px); /* small overshoot for bounce effect */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
