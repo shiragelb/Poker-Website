@@ -154,6 +154,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let transfersCount = 0;
   // ----- Settlement Calculation -----
   calcBtn.addEventListener("click", () => {
+  curGame = {
+  players: [],
+  transactions: []
+  };
     transfersCount = 0;
     const playerCards = document.querySelectorAll(".player-card");
     const players = [];
@@ -428,7 +432,10 @@ document.querySelector('.save-btn').addEventListener('click', () => {
     transfersCount: transfersCount,
     players: JSON.parse(JSON.stringify(curGame.players)), // deep copy players
     transactions: JSON.parse(JSON.stringify(curGame.transactions)) // deep copy transactions
+    
   };
+  console.log("transactions:", curGame.transactions);
+  console.log("players:", curGame.players);
 
   // Prevent duplicates: compare with the first (latest) game in history
   const lastGame = gameHistory[0];
