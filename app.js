@@ -185,7 +185,7 @@ curGame.players = validPlayers.map(p => ({
 }));
 
 // Separate creditors and debtors
-let creditors = validPlayers.filter(p => p.balance >= 0).map(p => ({...p}));
+let creditors = validPlayers.filter(p => p.balance > 0).map(p => ({...p}));
 let debtors = validPlayers.filter(p => p.balance < 0).map(p => ({...p}));
 
 // Clear previous results
