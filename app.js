@@ -19,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function recalcTotals() {
     let totalPot = 0;
     let totalChips = 0;
-
     document.querySelectorAll(".player-card").forEach(card => {
       const buyIn = parseFloat(card.querySelector(".buyin-input").value) || 0;
       const chips = parseFloat(card.querySelector(".chips-input").value) || 0;
