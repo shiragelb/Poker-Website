@@ -436,10 +436,12 @@ document.querySelector('.save-btn').addEventListener('click', () => {
     lastGame.totalPlayers === savedGame.totalPlayers &&
     lastGame.totalPot === savedGame.totalPot &&
     lastGame.transfersCount === savedGame.transfersCount &&
-    JSON.stringify(lastGame.players) === JSON.stringify(savedGame.players);
+    JSON.stringify(lastGame.players) === JSON.stringify(savedGame.players) &&
+    JSON.stringify(lastGame.transactions) === JSON.stringify(savedGame.transactions);
 
   // Save new game
-  gameHistory.unshift(savedGame);
+  if (!isDuplicate){
+  gameHistory.unshift(savedGame);}
   localStorage.setItem("gameHistory", JSON.stringify(gameHistory));
 
   if (!document.getElementById("historyPage").classList.contains("d-none")) {
