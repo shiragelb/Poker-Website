@@ -174,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 // Filter only players with valid data
-const validPlayers = players.filter(p => p.buyIn > 0 && p.chips > 0);
+const validPlayers = players.filter(p=> p.buyIn >= 0 && p.chips >= 0);
 if (validPlayers.length < 2) return;
 
 // store players in game object
@@ -186,7 +186,7 @@ curGame.players = validPlayers.map(p => ({
 }));
 
 // Separate creditors and debtors
-let creditors = validPlayers.filter(p => p.balance > 0).map(p => ({...p}));
+let creditors = validPlayers.filter(p => p.balance >= 0).map(p => ({...p}));
 let debtors = validPlayers.filter(p => p.balance < 0).map(p => ({...p}));
 
 // Clear previous results
@@ -243,7 +243,6 @@ while (debtors.length && creditors.length) {
     to: creditor.name,
     amount: amount
   });
-
   
   debtor.balance += amount;
   creditor.balance -= amount;
@@ -286,9 +285,9 @@ curGame.totalPlayers = curGame.players.length;
 curGame.totalPot = parseFloat(totalPotEl.textContent.replace("$", "")) || 0;
 curGame.transfersCount = transfersCount;
 
-console.log("Rendering history...", gameHistory);
 // Render each game
 gameHistory.forEach((game, idx) => {
+  console.log("Rendering game:", game);
   const card = document.createElement("div");
   card.className = "col-12 col-md-10 col-lg-8 mx-auto mb-4"; // centered
 
@@ -428,19 +427,28 @@ document.querySelector('.save-btn').addEventListener('click', () => {
     totalPlayers: curGame.players.length,
     totalPot: parseFloat(totalPotEl.textContent.replace("$", "")) || 0,
     transfersCount: transfersCount,
-    players: JSON.parse(JSON.stringify(curGame.players)) // deep copy players
+    players: JSON.parse(JSON.stringify(curGame.players)), // deep copy players
+    transactions: JSON.parse(JSON.stringify(curGame.transactions)) // deep copy transactions
   };
 
+  // Prevent duplicates: compare with the first (latest) game in history
+  const lastGame = gameHistory[0];
+  const isDuplicate = lastGame &&
+    lastGame.totalPlayers === savedGame.totalPlayers &&
+    lastGame.totalPot === savedGame.totalPot &&
+    lastGame.transfersCount === savedGame.transfersCount &&
+    JSON.stringify(lastGame.players) === JSON.stringify(savedGame.players);
+
+  // Save new game
   gameHistory.unshift(savedGame);
   localStorage.setItem("gameHistory", JSON.stringify(gameHistory));
 
   if (!document.getElementById("historyPage").classList.contains("d-none")) {
     renderHistory();
   }
- 
-  });
 
   saved = true;
+});
 
   document.getElementById("clearHistoryBtn").addEventListener("click", () => {
     // Clear in-memory list and localStorage
