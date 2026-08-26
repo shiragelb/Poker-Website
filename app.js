@@ -14,6 +14,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const MIN_PLAYERS = 2;
   const MAX_PLAYERS = 8;
+  const MAX_AMOUNT = 10000;
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function parseAmount(value) {
+    const n = parseInt(value, 10);
+    if (Number.isNaN(n) || n < 0) return 0;
+    return Math.min(MAX_AMOUNT, n);
+  }
+
+  function formatAmount(value) {
+    return String(Math.round(Math.abs(Number(value) || 0)));
+  }
+
+  function sanitizeAmountField(input) {
+    const cleaned = String(input.value).replace(/[^\d]/g, "");
+    if (cleaned === "") {
+      input.value = "";
+      return;
+    }
+    input.value = String(parseAmount(cleaned));
+  }
+
+  function wireAmountInput(input) {
+    if (!input) return;
+    input.min = "0";
+    input.max = String(MAX_AMOUNT);
+    input.step = "1";
+    input.setAttribute("inputmode", "numeric");
+    input.addEventListener("keydown", (event) => {
+      if ([".", ",", "e", "E", "+", "-"].includes(event.key)) {
+        event.preventDefault();
+      }
+    });
+    input.addEventListener("input", () => {
+      sanitizeAmountField(input);
+      recalcTotals();
+    });
+  }
 
   // ----- Helper Functions -----
 
@@ -21,14 +67,14 @@ document.addEventListener("DOMContentLoaded", () => {
     let totalPot = 0;
     let totalChips = 0;
     document.querySelectorAll(".player-card").forEach(card => {
-      const buyIn = parseFloat(card.querySelector(".buyin-input").value) || 0;
-      const chips = parseFloat(card.querySelector(".chips-input").value) || 0;
+      const buyIn = parseAmount(card.querySelector(".buyin-input").value);
+      const chips = parseAmount(card.querySelector(".chips-input").value);
       totalPot += buyIn;
       totalChips += chips;
     });
 
-    totalPotEl.textContent = totalPot.toFixed(2);
-    totalChipsEl.textContent = totalChips.toFixed(2);
+    totalPotEl.textContent = formatAmount(totalPot);
+    totalChipsEl.textContent = formatAmount(totalChips);
     hideMismatchBanners();
 
     const playerCount = document.querySelectorAll(".player-card").length;
@@ -64,9 +110,9 @@ document.addEventListener("DOMContentLoaded", () => {
         <label class="field-label">Player Name</label>
         <input type="text" class="field-input player-name-input" placeholder="player name">
         <label class="field-label">Buy-in Amount</label>
-        <input type="number" class="field-input buyin-input" placeholder="0">
+        <input type="number" class="field-input buyin-input" min="0" max="10000" step="1" inputmode="numeric" placeholder="0">
         <label class="field-label">Current chips ($)</label>
-        <input type="number" class="field-input chips-input" placeholder="0">
+        <input type="number" class="field-input chips-input" min="0" max="10000" step="1" inputmode="numeric" placeholder="0">
       </div>
     `;
 
@@ -74,8 +120,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const chipsInput = col.querySelector(".chips-input");
     const removeBtn = col.querySelector(".removePlayerBtn");
 
-    buyInInput.addEventListener("input", recalcTotals);
-    chipsInput.addEventListener("input", recalcTotals);
+    wireAmountInput(buyInInput);
+    wireAmountInput(chipsInput);
 
     removeBtn.addEventListener("click", () => {
       if (document.querySelectorAll(".player-card").length > MIN_PLAYERS) {
@@ -94,8 +140,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const buyInInput = card.querySelector(".buyin-input");
     const chipsInput = card.querySelector(".chips-input");
 
-    if (buyInInput) buyInInput.addEventListener("input", recalcTotals);
-    if (chipsInput) chipsInput.addEventListener("input", recalcTotals);
+    wireAmountInput(buyInInput);
+    wireAmountInput(chipsInput);
 
     const removeBtn = card.querySelector(".removePlayerBtn");
     if (!removeBtn) return;
@@ -139,7 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function hideMismatchBanners() {
     document.querySelectorAll(".mismatch-banner").forEach(banner => {
       banner.classList.add("d-none");
-      banner.innerHTML = "";
+      banner.textContent = "";
     });
   }
 
@@ -147,20 +193,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const potCents = toCents(totalPot);
     const chipCents = toCents(totalChips);
     const balanced = potCents === chipCents;
-    const diff = (Math.abs(chipCents - potCents) / 100).toFixed(2);
+    const diff = (Math.abs(chipCents - potCents) / 100);
     const extraChips = chipCents > potCents;
     const message = extraChips
-      ? `<strong>Chip count doesn't match buy-ins.</strong> There is $${diff} more in chips than was bought in. Check the stacks — settlement can't fully balance.`
-      : `<strong>Chip count doesn't match buy-ins.</strong> There is $${diff} missing from the table compared to buy-ins. Check the stacks — settlement can't fully balance.`;
+      ? `Chip count doesn't match buy-ins. There is $${formatAmount(diff)} more in chips than was bought in. Check the stacks — settlement can't fully balance.`
+      : `Chip count doesn't match buy-ins. There is $${formatAmount(diff)} missing from the table compared to buy-ins. Check the stacks — settlement can't fully balance.`;
 
     document.querySelectorAll(".mismatch-banner").forEach(banner => {
       if (balanced) {
         banner.classList.add("d-none");
-        banner.innerHTML = "";
+        banner.textContent = "";
         return;
       }
       banner.classList.remove("d-none");
-      banner.innerHTML = message;
+      banner.textContent = message;
     });
   }
 
@@ -281,8 +327,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Collect all players
     playerCards.forEach((card, index) => {
       const nameInput = card.querySelector(".player-name-input");
-      const buyIn = parseFloat(card.querySelector(".buyin-input").value) || 0;
-      const chips = parseFloat(card.querySelector(".chips-input").value) || 0;
+      const buyIn = parseAmount(card.querySelector(".buyin-input").value);
+      const chips = parseAmount(card.querySelector(".chips-input").value);
       players.push({
         card,
         name: nameInput.value || `Player ${index + 1}`,
@@ -313,12 +359,16 @@ validPlayers.forEach(p => {
   const diff = p.balance;
   const balanceDiv = document.createElement("div");
   balanceDiv.className = `balance-row ${diff >= 0 ? "balance-row--win" : "balance-row--lose"}`;
-  balanceDiv.innerHTML = `
-    <span class="balance-name">${p.name}</span>
-    <span class="balance-amount ${diff >= 0 ? "balance-amount--win" : "balance-amount--lose"}">
-      ${diff >= 0 ? "+" : ""}$${diff.toFixed(2)}
-    </span>
-  `;
+
+  const nameEl = document.createElement("span");
+  nameEl.className = "balance-name";
+  nameEl.textContent = p.name;
+
+  const amountEl = document.createElement("span");
+  amountEl.className = `balance-amount ${diff >= 0 ? "balance-amount--win" : "balance-amount--lose"}`;
+  amountEl.textContent = `${diff >= 0 ? "+" : "-"}$${formatAmount(diff)}`;
+
+  balanceDiv.append(nameEl, amountEl);
   balancesContainer.appendChild(balanceDiv);
 });
 
@@ -333,17 +383,36 @@ curGame.transactions = transactions.map(t => ({
 transactions.forEach(t => {
   const transDiv = document.createElement("div");
   transDiv.className = "transfer-row";
-  transDiv.innerHTML = `
-    <div class="d-flex align-items-center gap-3">
-      <span class="fw-medium">${t.from}</span>
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M5 12h14"></path>
-        <path d="m12 5 7 7-7 7"></path>
-      </svg>
-      <span class="fw-medium">${t.to}</span>
-    </div>
-    <span class="amount-chip">$${t.amount.toFixed(2)}</span>
-  `;
+
+  const parties = document.createElement("div");
+  parties.className = "d-flex align-items-center gap-3";
+
+  const fromEl = document.createElement("span");
+  fromEl.className = "fw-medium";
+  fromEl.textContent = t.from;
+
+  const arrow = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  arrow.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  arrow.setAttribute("width", "20");
+  arrow.setAttribute("height", "20");
+  arrow.setAttribute("fill", "none");
+  arrow.setAttribute("stroke", "currentColor");
+  arrow.setAttribute("stroke-width", "2");
+  arrow.setAttribute("stroke-linecap", "round");
+  arrow.setAttribute("stroke-linejoin", "round");
+  arrow.innerHTML = `<path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>`;
+
+  const toEl = document.createElement("span");
+  toEl.className = "fw-medium";
+  toEl.textContent = t.to;
+
+  parties.append(fromEl, arrow, toEl);
+
+  const amountEl = document.createElement("span");
+  amountEl.className = "amount-chip";
+  amountEl.textContent = `$${formatAmount(t.amount)}`;
+
+  transDiv.append(parties, amountEl);
   transactionsContainer.appendChild(transDiv);
 });
 
@@ -382,7 +451,7 @@ function renderHistory() {
 curGame.name = document.querySelector(".game-name").value || "Unnamed Game";
 curGame.date = new Date().toISOString(); // or .toLocaleString() if you prefer readable
 curGame.totalPlayers = curGame.players.length;
-curGame.totalPot = parseFloat(totalPotEl.textContent) || 0;
+curGame.totalPot = Math.round(Math.abs(Number(totalPotEl.textContent) || 0));
 curGame.transfersCount = transfersCount;
 
 // Render each game
@@ -394,22 +463,22 @@ gameHistory.forEach((game, idx) => {
   card.innerHTML = `
       <div class="history-card-head">
         <div>
-          <h5 class="history-card-title">${game.name || "Unnamed Game"}</h5>
-          <span class="history-card-date">${new Date(game.date).toLocaleString()}</span>
+          <h5 class="history-card-title">${escapeHtml(game.name || "Unnamed Game")}</h5>
+          <span class="history-card-date">${escapeHtml(new Date(game.date).toLocaleString())}</span>
         </div>
         <div class="history-badge">completed</div>
       </div>
       <div class="history-stats">
         <div class="history-stat">
-          <div class="history-stat-value">${game.totalPlayers}</div>
+          <div class="history-stat-value">${escapeHtml(game.totalPlayers)}</div>
           <div class="history-stat-label">players</div>
         </div>
         <div class="history-stat">
-          <div class="history-stat-value">${game.totalPot.toFixed(2)}</div>
+          <div class="history-stat-value">${escapeHtml(formatAmount(game.totalPot))}</div>
           <div class="history-stat-label">pot</div>
         </div>
         <div class="history-stat">
-          <div class="history-stat-value">${game.transfersCount}</div>
+          <div class="history-stat-value">${escapeHtml(game.transfersCount)}</div>
           <div class="history-stat-label">transfers</div>
         </div>
       </div>
@@ -417,23 +486,23 @@ gameHistory.forEach((game, idx) => {
         <h6 class="panel-title">players</h6>
         ${(game.players || []).map(p => `
           <div class="balance-row ${p.balance >= 0 ? "balance-row--win" : "balance-row--lose"}">
-            <span class="balance-name">${p.name}</span>
-            <small>buy-in: $${p.buyIn.toFixed(2)} | chips: $${p.chips.toFixed(2)}</small>
+            <span class="balance-name">${escapeHtml(p.name)}</span>
+            <small>buy-in: $${escapeHtml(formatAmount(p.buyIn))} | chips: $${escapeHtml(formatAmount(p.chips))}</small>
           </div>
         `).join("")}
         <h6 class="panel-title" style="margin-top:16px;">settlement transactions</h6>
         ${(game.transactions || []).map(t => `
           <div class="transfer-row">
             <div class="d-flex align-items-center gap-3">
-              <span>${t.from}</span>
+              <span>${escapeHtml(t.from)}</span>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M5 12h14"></path>
                 <path d="m12 5 7 7-7 7"></path>
               </svg>
-              <span>${t.to}</span>
+              <span>${escapeHtml(t.to)}</span>
             </div>
-            <span class="amount-chip">$${t.amount.toFixed(2)}</span>
+            <span class="amount-chip">$${escapeHtml(formatAmount(t.amount))}</span>
           </div>
         `).join("")}
       </div>
@@ -475,7 +544,7 @@ document.querySelector('.save-btn').addEventListener('click', () => {
     name: document.querySelector(".game-name").value || "Unnamed Game",
     date: new Date().toISOString(),
     totalPlayers: curGame.players.length,
-    totalPot: parseFloat(totalPotEl.textContent) || 0,
+    totalPot: Math.round(Math.abs(Number(totalPotEl.textContent) || 0)),
     transfersCount: transfersCount,
     players: JSON.parse(JSON.stringify(curGame.players)), // deep copy players
     transactions: JSON.parse(JSON.stringify(curGame.transactions)) // deep copy transactions
