@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     totalPotEl.textContent = `$${totalPot.toFixed(2)}`;
     totalChipsEl.textContent = `$${totalChips.toFixed(2)}`;
+    updateMismatchBanners(totalPot, totalChips);
 
     const playerCount = document.querySelectorAll(".player-card").length;
     addPlayerBtn.disabled = playerCount >= MAX_PLAYERS;
@@ -152,6 +153,136 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   let transfersCount = 0;
+
+  function toCents(value) {
+    return Math.round((parseFloat(value) || 0) * 100);
+  }
+
+  function updateMismatchBanners(totalPot, totalChips) {
+    const potCents = toCents(totalPot);
+    const chipCents = toCents(totalChips);
+    const balanced = potCents === chipCents;
+    const diff = (Math.abs(chipCents - potCents) / 100).toFixed(2);
+    const extraChips = chipCents > potCents;
+    const message = extraChips
+      ? `<strong>Chip count doesn't match buy-ins.</strong> There is $${diff} more in chips than was bought in. Check the stacks — settlement can't fully balance.`
+      : `<strong>Chip count doesn't match buy-ins.</strong> There is $${diff} missing from the table compared to buy-ins. Check the stacks — settlement can't fully balance.`;
+
+    document.querySelectorAll(".mismatch-banner").forEach(banner => {
+      if (balanced) {
+        banner.classList.add("d-none");
+        banner.innerHTML = "";
+        return;
+      }
+      banner.classList.remove("d-none");
+      banner.innerHTML = message;
+    });
+  }
+
+  // Pair debtors with creditors inside one group. Optimal when that group
+  // cannot be split into smaller zero-sum subsets.
+  function greedySettle(people) {
+    const creditors = people.filter(p => p.balance > 0).map(p => ({ ...p }));
+    const debtors = people.filter(p => p.balance < 0).map(p => ({ ...p }));
+    const txs = [];
+    let i = 0;
+    let j = 0;
+
+    while (i < debtors.length && j < creditors.length) {
+      const amount = Math.min(creditors[j].balance, -debtors[i].balance);
+      if (amount > 0) {
+        txs.push({
+          from: debtors[i].name,
+          to: creditors[j].name,
+          amount
+        });
+        debtors[i].balance += amount;
+        creditors[j].balance -= amount;
+      }
+      if (debtors[i].balance === 0) i++;
+      if (creditors[j].balance === 0) j++;
+    }
+
+    return txs;
+  }
+
+  function maskToPeople(people, mask) {
+    return people.filter((_, idx) => mask & (1 << idx));
+  }
+
+  // Minimum transfers: bitmask DP finds the maximum number of zero-sum groups
+  // (min transfers = n - k when the table balances). Then greedy-settle each group.
+  function computeMinTransfers(players) {
+    const people = players
+      .map(p => ({ name: p.name, balance: toCents(p.chips) - toCents(p.buyIn) }))
+      .filter(p => p.balance !== 0);
+
+    if (people.length === 0) return [];
+
+    const n = people.length;
+    const size = 1 << n;
+    const subsetSum = new Int32Array(size);
+
+    for (let mask = 1; mask < size; mask++) {
+      const bit = mask & -mask;
+      const idx = 31 - Math.clz32(bit);
+      subsetSum[mask] = subsetSum[mask ^ bit] + people[idx].balance;
+    }
+
+    const dp = new Uint8Array(size);
+    for (let mask = 1; mask < size; mask++) {
+      let best = 0;
+      for (let sub = mask; sub > 0; sub = (sub - 1) & mask) {
+        if (subsetSum[sub] === 0) {
+          const val = dp[mask ^ sub] + 1;
+          if (val > best) best = val;
+        }
+      }
+      dp[mask] = best;
+    }
+
+    const groups = [];
+    function splitMask(mask) {
+      if (mask === 0 || dp[mask] === 0) return;
+
+      if (subsetSum[mask] === 0 && dp[mask] === 1) {
+        groups.push(mask);
+        return;
+      }
+
+      for (let sub = (mask - 1) & mask; sub > 0; sub = (sub - 1) & mask) {
+        if (dp[sub] + dp[mask ^ sub] === dp[mask]) {
+          splitMask(sub);
+          splitMask(mask ^ sub);
+          return;
+        }
+      }
+
+      if (subsetSum[mask] === 0) groups.push(mask);
+    }
+
+    const full = size - 1;
+    splitMask(full);
+
+    let used = 0;
+    const txs = [];
+    groups.forEach(mask => {
+      used |= mask;
+      greedySettle(maskToPeople(people, mask)).forEach(t => txs.push(t));
+    });
+
+    const leftover = full ^ used;
+    if (leftover) {
+      greedySettle(maskToPeople(people, leftover)).forEach(t => txs.push(t));
+    }
+
+    return txs.map(t => ({
+      from: t.from,
+      to: t.to,
+      amount: t.amount / 100
+    }));
+  }
+
   // ----- Settlement Calculation -----
   calcBtn.addEventListener("click", () => {
   curGame = {
@@ -188,10 +319,6 @@ curGame.players = validPlayers.map(p => ({
   chips: p.chips
 }));
 
-// Separate creditors and debtors
-let creditors = validPlayers.filter(p => p.balance > 0).map(p => ({...p}));
-let debtors = validPlayers.filter(p => p.balance < 0).map(p => ({...p}));
-
 // Clear previous results
 balancesContainer.innerHTML = "";
 transactionsContainer.innerHTML = "";
@@ -215,45 +342,30 @@ validPlayers.forEach(p => {
   balancesContainer.appendChild(balanceDiv);
 });
 
+const transactions = computeMinTransfers(validPlayers);
+transfersCount = transactions.length;
+curGame.transactions = transactions.map(t => ({
+  from: t.from,
+  to: t.to,
+  amount: t.amount
+}));
 
-// Settlement transactions
-
-while (debtors.length && creditors.length) {
-  const debtor = debtors[0];
-  const creditor = creditors[0];
-
-  const amount = Math.min(creditor.balance, -debtor.balance);
-
-  // UI rendering
+transactions.forEach(t => {
   const transDiv = document.createElement("div");
   transDiv.className = "d-flex justify-content-between align-items-center p-2 mb-2 bg-secondary bg-opacity-25 rounded border border-secondary";
   transDiv.innerHTML = `
     <div class="d-flex align-items-center gap-3">
-      <span class="fw-medium">${debtor.name}</span>
+      <span class="fw-medium">${t.from}</span>
       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-danger">
         <path d="M5 12h14"></path>
         <path d="m12 5 7 7-7 7"></path>
       </svg>
-      <span class="fw-medium">${creditor.name}</span>
+      <span class="fw-medium">${t.to}</span>
     </div>
-    <span class="badge bg-danger text-white">$${amount.toFixed(2)}</span>
+    <span class="badge bg-danger text-white">$${t.amount.toFixed(2)}</span>
   `;
   transactionsContainer.appendChild(transDiv);
-  transfersCount++;
-  // Save to game.transactions (so your history HTML can render it)
-  curGame.transactions.push({
-    from: debtor.name,
-    to: creditor.name,
-    amount: amount
-  });
-  
-  debtor.balance += amount;
-  creditor.balance -= amount;
-
-  if (debtor.balance === 0) debtors.shift();
-  if (creditor.balance === 0) creditors.shift();
-
-}
+});
 
 settlementSection.classList.remove("d-none");
 const transfersBadge = settlementSection.querySelector(".transfers-num");

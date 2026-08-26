@@ -58,6 +58,11 @@ input[type=number] {
   animation: popInTop 0.6s ease-out forwards;
 }
 
+.mismatch-banner {
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
 @keyframes popInTop {
   0% {
     opacity: 0;
