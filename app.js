@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     totalPotEl.textContent = totalPot.toFixed(2);
     totalChipsEl.textContent = totalChips.toFixed(2);
-    updateMismatchBanners(totalPot, totalChips);
+    hideMismatchBanners();
 
     const playerCount = document.querySelectorAll(".player-card").length;
     addPlayerBtn.disabled = playerCount >= MAX_PLAYERS;
@@ -134,6 +134,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function toCents(value) {
     return Math.round((parseFloat(value) || 0) * 100);
+  }
+
+  function hideMismatchBanners() {
+    document.querySelectorAll(".mismatch-banner").forEach(banner => {
+      banner.classList.add("d-none");
+      banner.innerHTML = "";
+    });
   }
 
   function updateMismatchBanners(totalPot, totalChips) {
@@ -344,6 +351,10 @@ settlementSection.classList.remove("d-none");
 settlementSection.scrollIntoView({ behavior: "smooth", block: "start" });
 const transfersBadge = settlementSection.querySelector(".transfers-num");
 transfersBadge.textContent = `${transfersCount} transfer${transfersCount !== 1 ? 's' : ''}`;
+
+const totalPot = validPlayers.reduce((sum, p) => sum + p.buyIn, 0);
+const totalChips = validPlayers.reduce((sum, p) => sum + p.chips, 0);
+updateMismatchBanners(totalPot, totalChips);
 });
 
 
