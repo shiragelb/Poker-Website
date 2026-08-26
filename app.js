@@ -1,15 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
   const addPlayerBtn = document.querySelector(".addPlayerBtn");
-  const playersGrid = document.querySelector(".row.g-4");
+  const playersGrid = document.getElementById("playersGrid");
 
-  const totalPotEl = document.querySelector(".row.text-center .col-md-6:first-child .fs-3");
-  const totalChipsEl = document.querySelector(".row.text-center .col-md-6:last-child .fs-3");
+  const totalPotEl = document.getElementById("totalPot");
+  const totalChipsEl = document.getElementById("totalChips");
 
   const settlementSection = document.getElementById("settlement-results");
-  const calcBtn = document.querySelector(".btn.btn-danger.d-flex.align-items-center.px-4.py-2");
+  const calcBtn = document.getElementById("calcBtn");
+  const calculatorNavBtn = document.querySelector(".Calculate-btn");
+  const historyNavBtn = document.getElementById("showHistoryBtn");
   const balancesContainer = settlementSection.querySelector(".balances-list");
   const transactionsContainer = settlementSection.querySelector(".transactions-list");
-
 
   const MIN_PLAYERS = 2;
   const MAX_PLAYERS = 8;
@@ -26,8 +27,8 @@ document.addEventListener("DOMContentLoaded", () => {
       totalChips += chips;
     });
 
-    totalPotEl.textContent = `$${totalPot.toFixed(2)}`;
-    totalChipsEl.textContent = `$${totalChips.toFixed(2)}`;
+    totalPotEl.textContent = totalPot.toFixed(2);
+    totalChipsEl.textContent = totalChips.toFixed(2);
     updateMismatchBanners(totalPot, totalChips);
 
     const playerCount = document.querySelectorAll(".player-card").length;
@@ -46,47 +47,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function createPlayerCard() {
     const col = document.createElement("div");
-    col.className = "col-md-6 col-lg-4 player-card pop-in-top";
+    col.className = "player-card pop-in-top";
 
     col.innerHTML = `
-      <div class="card bg-dark border-secondary shadow-sm h-100">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-start mb-3">
-            <div class="d-flex align-items-center gap-3">
-              <div class="rounded-circle bg-danger bg-opacity-25 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
-                 <i class="bi bi-person text-danger">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="7" r="4"></circle>
-              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-            </svg></i>
-              </div>
-              <div>
-                <h5 class="mb-0 text-white">Player</h5>
-                <small class="text-muted">Still playing</small>
-              </div>
-            </div>
-            <button class="btn btn-sm btn-outline-danger removePlayerBtn">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round" class="x-icon">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-            </button>
-          </div>
-          <div class="mb-3">
-            <label class="form-label text-light">Player Name</label>
-            <input type="text" class="form-control bg-secondary text-white border-0 player-name-input" placeholder="Enter player name">
-          </div>
-          <div class="mb-3">
-            <label class="form-label text-light">Buy-in Amount ($)</label>
-            <input type="number" class="form-control bg-secondary text-white border-0 buyin-input" placeholder="0">
-          </div>
-          <div class="mb-3">
-            <label class="form-label text-light">Current Chips ($)</label>
-            <input type="number" class="form-control bg-secondary text-white border-0 chips-input" placeholder="0">
-          </div>
+      <div class="player-card-inner">
+        <div class="player-card-head">
+          <h5>Player</h5>
+          <button type="button" class="removePlayerBtn" aria-label="Remove player">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" class="x-icon">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
+        <label class="field-label">Player Name</label>
+        <input type="text" class="field-input player-name-input" placeholder="player name">
+        <label class="field-label">Buy-in Amount</label>
+        <input type="number" class="field-input buyin-input" placeholder="0">
+        <label class="field-label">Current chips ($)</label>
+        <input type="number" class="field-input chips-input" placeholder="0">
       </div>
     `;
 
@@ -98,9 +78,11 @@ document.addEventListener("DOMContentLoaded", () => {
     chipsInput.addEventListener("input", recalcTotals);
 
     removeBtn.addEventListener("click", () => {
-      col.remove();
-      renumberPlayers();
-      recalcTotals();
+      if (document.querySelectorAll(".player-card").length > MIN_PLAYERS) {
+        col.remove();
+        renumberPlayers();
+        recalcTotals();
+      }
     });
 
     return col;
@@ -109,18 +91,14 @@ document.addEventListener("DOMContentLoaded", () => {
   function initializePlayerCard(card) {
     card.classList.add("player-card");
 
-    // Make sure all inputs have the proper classes
-    const buyInInput = card.querySelector("input.buyin-input") || card.querySelector("input[type='number']");
-    const chipsInput = card.querySelector("input.chips-input") || card.querySelectorAll("input[type='number']")[1];
-    if (buyInInput) buyInInput.classList.add("buyin-input");
-    if (chipsInput) chipsInput.classList.add("chips-input");
+    const buyInInput = card.querySelector(".buyin-input");
+    const chipsInput = card.querySelector(".chips-input");
 
-    // Attach listeners
     if (buyInInput) buyInInput.addEventListener("input", recalcTotals);
     if (chipsInput) chipsInput.addEventListener("input", recalcTotals);
 
-    const removeBtn = card.querySelector(".btn-outline-danger");
-    removeBtn.classList.add("removePlayerBtn");
+    const removeBtn = card.querySelector(".removePlayerBtn");
+    if (!removeBtn) return;
     removeBtn.addEventListener("click", () => {
       if (document.querySelectorAll(".player-card").length > MIN_PLAYERS) {
         card.remove();
@@ -327,17 +305,12 @@ transactionsContainer.innerHTML = "";
 validPlayers.forEach(p => {
   const diff = p.balance;
   const balanceDiv = document.createElement("div");
-  balanceDiv.className = `d-flex justify-content-between align-items-center p-2 mb-2 ${
-    diff >= 0 ? 'bg-success bg-opacity-25 border border-success' : 'bg-danger bg-opacity-25 border border-danger'
-  } rounded`;
+  balanceDiv.className = `balance-row ${diff >= 0 ? "balance-row--win" : "balance-row--lose"}`;
   balanceDiv.innerHTML = `
-    <div class="d-flex align-items-center gap-2">
-      <span class="badge ${diff >= 0 ? 'bg-success' : 'bg-danger'}">&nbsp;</span>
-      <span>${p.name}</span>
-    </div>
-    <div class="d-flex align-items-center gap-1 fw-bold ${diff >= 0 ? 'text-success' : 'text-danger'}">
-      ${diff >= 0 ? '+' : ''}$${diff.toFixed(2)}
-    </div>
+    <span class="balance-name">${p.name}</span>
+    <span class="balance-amount ${diff >= 0 ? "balance-amount--win" : "balance-amount--lose"}">
+      ${diff >= 0 ? "+" : ""}$${diff.toFixed(2)}
+    </span>
   `;
   balancesContainer.appendChild(balanceDiv);
 });
@@ -352,22 +325,23 @@ curGame.transactions = transactions.map(t => ({
 
 transactions.forEach(t => {
   const transDiv = document.createElement("div");
-  transDiv.className = "d-flex justify-content-between align-items-center p-2 mb-2 bg-secondary bg-opacity-25 rounded border border-secondary";
+  transDiv.className = "transfer-row";
   transDiv.innerHTML = `
     <div class="d-flex align-items-center gap-3">
       <span class="fw-medium">${t.from}</span>
-      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-danger">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M5 12h14"></path>
         <path d="m12 5 7 7-7 7"></path>
       </svg>
       <span class="fw-medium">${t.to}</span>
     </div>
-    <span class="badge bg-danger text-white">$${t.amount.toFixed(2)}</span>
+    <span class="amount-chip">$${t.amount.toFixed(2)}</span>
   `;
   transactionsContainer.appendChild(transDiv);
 });
 
 settlementSection.classList.remove("d-none");
+settlementSection.scrollIntoView({ behavior: "smooth", block: "start" });
 const transfersBadge = settlementSection.querySelector(".transfers-num");
 transfersBadge.textContent = `${transfersCount} transfer${transfersCount !== 1 ? 's' : ''}`;
 });
@@ -389,7 +363,7 @@ function renderHistory() {
   historyList.innerHTML = "";
 
   if (gameHistory.length === 0) {
-    historyList.innerHTML = `<p class="text-gray-400 text-center">No game history yet.</p>`;
+    historyList.innerHTML = `<p class="text-center app-subtitle">No game history yet.</p>`;
     return;
   }
 
@@ -397,119 +371,64 @@ function renderHistory() {
 curGame.name = document.querySelector(".game-name").value || "Unnamed Game";
 curGame.date = new Date().toISOString(); // or .toLocaleString() if you prefer readable
 curGame.totalPlayers = curGame.players.length;
-curGame.totalPot = parseFloat(totalPotEl.textContent.replace("$", "")) || 0;
+curGame.totalPot = parseFloat(totalPotEl.textContent) || 0;
 curGame.transfersCount = transfersCount;
 
 // Render each game
 gameHistory.forEach((game, idx) => {
   console.log("Rendering game:", game);
   const card = document.createElement("div");
-  card.className = "col-12 col-md-10 col-lg-8 mx-auto mb-4"; // centered
+  card.className = "history-card";
 
   card.innerHTML = `
-    <div class="card bg-dark border border-secondary shadow-sm rounded-4">
-      <!-- Header -->
-      <div class="card-body d-flex justify-content-between align-items-center border-bottom border-secondary pb-3">
-        <div class="d-flex align-items-center gap-3">
-          <!-- Icon -->
-          <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-25 rounded-3" 
-               style="width: 48px; height: 48px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-              class="lucide lucide-users text-danger">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-          </div>
-          <!-- Title + Date -->
-          <div>
-            <h5 class="mb-1 fw-bold text-white">${game.name || "Unnamed Game"}</h5>
-            <small class="text-light opacity-75">${new Date(game.date).toLocaleString()}</small>
-          </div>
+      <div class="history-card-head">
+        <div>
+          <h5 class="history-card-title">${game.name || "Unnamed Game"}</h5>
+          <span class="history-card-date">${new Date(game.date).toLocaleString()}</span>
         </div>
-        <!-- Status badge -->
-        <div class="badge rounded-pill bg-success bg-opacity-25 text-success px-3 py-2">
-          Completed
+        <div class="history-badge">completed</div>
+      </div>
+      <div class="history-stats">
+        <div class="history-stat">
+          <div class="history-stat-value">${game.totalPlayers}</div>
+          <div class="history-stat-label">players</div>
+        </div>
+        <div class="history-stat">
+          <div class="history-stat-value">${game.totalPot.toFixed(2)}</div>
+          <div class="history-stat-label">pot</div>
+        </div>
+        <div class="history-stat">
+          <div class="history-stat-value">${game.transfersCount}</div>
+          <div class="history-stat-label">transfers</div>
         </div>
       </div>
-
-      <!-- Stats row -->
-      <div class="card-body">
-        <div class="row g-3 text-center">
-          <div class="col-md-4">
-            <div class="bg-secondary bg-opacity-25 rounded-3 p-3">
-              <div class="fs-5 fw-bold text-white">${game.totalPlayers}</div>
-              <small class="text-light opacity-75">Players</small>
-            </div>
+      <div class="history-details collapse" id="collapse-${idx}">
+        <h6 class="panel-title">players</h6>
+        ${(game.players || []).map(p => `
+          <div class="balance-row ${p.balance >= 0 ? "balance-row--win" : "balance-row--lose"}">
+            <span class="balance-name">${p.name}</span>
+            <small>buy-in: $${p.buyIn.toFixed(2)} | chips: $${p.chips.toFixed(2)}</small>
           </div>
-          <div class="col-md-4">
-            <div class="bg-secondary bg-opacity-25 rounded-3 p-3">
-              <div class="fs-5 fw-bold text-white">$${game.totalPot.toFixed(2)}</div>
-              <small class="text-light opacity-75">Pot</small>
+        `).join("")}
+        <h6 class="panel-title" style="margin-top:16px;">settlement transactions</h6>
+        ${(game.transactions || []).map(t => `
+          <div class="transfer-row">
+            <div class="d-flex align-items-center gap-3">
+              <span>${t.from}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14"></path>
+                <path d="m12 5 7 7-7 7"></path>
+              </svg>
+              <span>${t.to}</span>
             </div>
+            <span class="amount-chip">$${t.amount.toFixed(2)}</span>
           </div>
-          <div class="col-md-4">
-            <div class="bg-secondary bg-opacity-25 rounded-3 p-3">
-              <div class="fs-5 fw-bold text-white">${game.transfersCount}</div>
-              <small class="text-light opacity-75">Transfers</small>
-            </div>
-          </div>
-        </div>
+        `).join("")}
       </div>
-
-
-      <!-- Collapsible content -->
-      <div class="card-body border-top border-secondary pt-4 collapse" id="collapse-${idx}">
-        <!-- Players -->
-        <h6 class="fw-semibold text-white mb-3">Players</h6>
-        <div class="row g-3">
-          ${(game.players || []).map(p => `
-            <div class="col-md-6">
-              <div class="d-flex justify-content-between align-items-center p-3 bg-secondary bg-opacity-25 rounded-3">
-                <div class="d-flex align-items-center gap-2">
-                  <div class="rounded-circle ${p.balance >= 0 ? "bg-success" : "bg-danger"}" style="width:10px;height:10px;"></div>
-                  <span class="fw-medium text-white">${p.name}</span>
-                </div>
-                <small class="text-light opacity-75">
-                  Buy-in: $${p.buyIn.toFixed(2)} | Chips: $${p.chips.toFixed(2)}
-                </small>
-              </div>
-            </div>
-          `).join("")}
-        </div>
-
-        <!-- Transactions -->
-        <h6 class="fw-semibold text-white mt-4 mb-3">Settlement Transactions</h6>
-        <div class="d-flex flex-column gap-3">
-          ${(game.transactions || []).map(t => `
-            <div class="d-flex justify-content-between align-items-center p-3 bg-secondary bg-opacity-25 rounded-3">
-              <div class="d-flex align-items-center gap-3">
-                <span class="fw-medium text-white">${t.from}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor"
-                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                  class="lucide lucide-arrow-right text-danger">
-                  <path d="M5 12h14"></path>
-                  <path d="m12 5 7 7-7 7"></path>
-                </svg>
-                <span class="fw-medium text-white">${t.to}</span>
-              </div>
-              <span class="badge bg-danger text-white px-3 py-2">$${t.amount.toFixed(2)}</span>
-            </div>
-          `).join("")}
-        </div>
-      </div>
-
-      <!-- Collapse toggle -->
-      <div class="card-footer text-center bg-dark border-0">
-        <button class="btn btn-sm btn-outline-secondary" 
-                data-bs-toggle="collapse" 
-                data-bs-target="#collapse-${idx}">
-          Show Details
-        </button>
-      </div>
-    </div>
+      <button class="history-toggle" data-bs-toggle="collapse" data-bs-target="#collapse-${idx}">
+        show details
+      </button>
   `;
 
   historyList.appendChild(card);
@@ -518,17 +437,22 @@ gameHistory.forEach((game, idx) => {
   // Attach toggle listeners
 }
 
-// Show History button
-document.getElementById("showHistoryBtn").addEventListener("click", () => {
+function setActiveNav(isHistory) {
+  calculatorNavBtn.classList.toggle("is-active", !isHistory);
+  historyNavBtn.classList.toggle("is-active", isHistory);
+}
+
+historyNavBtn.addEventListener("click", () => {
   document.getElementById("mainPage").classList.add("d-none");
   document.getElementById("historyPage").classList.remove("d-none");
-  renderHistory(); // render when opened
+  setActiveNav(true);
+  renderHistory();
 });
 
-// Calculator button
-document.querySelector(".Calculate-btn").addEventListener("click", () => {
+calculatorNavBtn.addEventListener("click", () => {
   document.getElementById("historyPage").classList.add("d-none");
   document.getElementById("mainPage").classList.remove("d-none");
+  setActiveNav(false);
 });
 
 
@@ -540,7 +464,7 @@ document.querySelector('.save-btn').addEventListener('click', () => {
     name: document.querySelector(".game-name").value || "Unnamed Game",
     date: new Date().toISOString(),
     totalPlayers: curGame.players.length,
-    totalPot: parseFloat(totalPotEl.textContent.replace("$", "")) || 0,
+    totalPot: parseFloat(totalPotEl.textContent) || 0,
     transfersCount: transfersCount,
     players: JSON.parse(JSON.stringify(curGame.players)), // deep copy players
     transactions: JSON.parse(JSON.stringify(curGame.transactions)) // deep copy transactions
@@ -577,14 +501,13 @@ document.querySelector('.save-btn').addEventListener('click', () => {
 
     // Animate cards fading out
     const historyList = document.getElementById("historyList");
-    historyList.querySelectorAll(".card").forEach(card => {
-      card.classList.add("fade-out"); // add CSS transition
+    historyList.querySelectorAll(".history-card").forEach(card => {
+      card.classList.add("fade-out");
     });
 
-    // After animation, replace with "No history"
     setTimeout(() => {
-      historyList.innerHTML = `<p class="text-gray-400 text-center">No game history yet.</p>`;
-    }, 300); // match transition time
+      historyList.innerHTML = `<p class="text-center app-subtitle">No game history yet.</p>`;
+    }, 300);
   });
 
 });
